@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VehiculeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -10,9 +11,12 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
    
     return $request->user();
 });
-// Route::post('/register', [RegisteredUserController::class, 'store'])
-//                 ->middleware('guest')
-//                 ->name('register');
+
+//vehicules00
+Route::post('AddCar',[VehiculeController::class, 'StoreCar']);
+Route::get('ViewCar',[VehiculeController::class, 'viewVehicule']);
+Route::delete('DeleteCar/{id}',[VehiculeController::class, 'deleteCar']);
+Route::post('updateCare/{id}',[VehiculeController::class, 'updateCar']);
 
  Route::post('register', [SuperAdminController::class, 'register']);
  Route::post('updateUser', [SuperAdminController::class, 'updateUser']);
