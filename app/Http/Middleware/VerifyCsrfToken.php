@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'register', // Ajouter cette ligne pour exclure la vérification CSRF pour la route de registration
-        'login', // Ajouter cette ligne pour exclure la vérification CSRF pour la route de login
+         'register',// Ajouter cette ligne pour exclure la vérification CSRF pour la route de registration
+        'login', //: Ajouter cette ligne pour exclure la vérification CSRF pour la route de login
         // Ajoutez d'autres routes que vous voulez exclure
     ];
 }
