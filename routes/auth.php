@@ -1,4 +1,4 @@
-<!-- auth.php -->
+
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
-               
+
                 ->name('register');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])

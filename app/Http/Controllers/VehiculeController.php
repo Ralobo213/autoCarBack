@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Galerie;
 use App\Models\Vehicule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class VehiculeController extends Controller
@@ -14,6 +16,7 @@ class VehiculeController extends Controller
         try {
             $req->validate([
                 'photo' => 'required|image|max:2048',
+                'images.*'=>'required|image|max:2048',
                 'marque' => 'required|string|max:255',
                 'matricule' => 'required|string|max:255',
                 'description' => 'required',
@@ -39,11 +42,29 @@ class VehiculeController extends Controller
                 $InsertVehicul->place = $req->place;
                 $InsertVehicul->bagage = $req->bagage;
                 $InsertVehicul->save();
+                $idVehicul = $InsertVehicul->id;
+
+                // procedure d'enregistrement des galerie
+                if ($req->hasFile('images')) {
+                    $GalerieFiles = $req->file('images');
+                    foreach ($GalerieFiles as $file) {
+                        $galerieName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $filePath = $file->storeAs('GalerieVehicule', $galerieName, 'public');
+
+                        $Galerie = new Galerie();
+                        $Galerie->image = $galerieName;
+                        $Galerie->vehicules_id = $idVehicul;
+                        $Galerie->save();
+                    }
+                }
+
+
 
                 return response()->json([
                     'message' => 'un vehicule est inseret avec succes!',
                     'file_path' => "/storage/$photoPath",
                     'path' => Storage::url($photoPath),
+                    'id' => $idVehicul,
                 ]);
             } else {
                 return response()->json([
@@ -132,4 +153,5 @@ class VehiculeController extends Controller
             ], 500);
         }
     }
+    
 }
