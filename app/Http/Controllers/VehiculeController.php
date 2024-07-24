@@ -8,53 +8,53 @@ use Illuminate\Support\Facades\Storage;
 
 class VehiculeController extends Controller
 {
-// insertion des vehicules
+    // insertion des vehicules
     public function StoreCar(Request $req)
     {
         try {
-    $req->validate([
-        'photo' => 'required|image|max:2048',
-        'marque' => 'required|string|max:255',
-        'matricule' => 'required|string|max:255',
-        'description' => 'required',
-        'prix' => 'required',
-        'porte' => 'required',
-        'place' => 'required',
-        'bagage' => 'required',
-    ]);
-    if ($req->hasFile('photo')) {
-        $photo = $req->file('photo');
-        $photoName = time().'.'.$photo->getClientOriginalExtension();
-        $photoPath = $photo->storeAs('ImageVehicule', $photoName, 'public');
+            $req->validate([
+                'photo' => 'required|image|max:2048',
+                'marque' => 'required|string|max:255',
+                'matricule' => 'required|string|max:255',
+                'description' => 'required',
+                'prix' => 'required',
+                'porte' => 'nullable',
+                'place' => 'required',
+                'bagage' => 'required',
+                'transmission' => 'nullable',
+            ]);
+            if ($req->hasFile('photo')) {
+                $photo = $req->file('photo');
+                $photoName = time() . '.' . $photo->getClientOriginalExtension();
+                $photoPath = $photo->storeAs('ImageVehicule', $photoName, 'public');
 
-        $InsertVehicul = new Vehicule();
-        $InsertVehicul->photo = $photoName;
-        $InsertVehicul->marque = $req->marque;
-        $InsertVehicul->matricule = $req->matricule;
-        $InsertVehicul->description = $req->description;
-        $InsertVehicul->prix = $req->prix;
-        $InsertVehicul->porte = $req->porte;
-        $InsertVehicul->place = $req->place;
-        $InsertVehicul->bagage = $req->bagage;
-        $InsertVehicul->save();
+                $InsertVehicul = new Vehicule();
+                $InsertVehicul->photo = $photoName;
+                $InsertVehicul->marque = $req->marque;
+                $InsertVehicul->matricule = $req->matricule;
+                $InsertVehicul->description = $req->description;
+                $InsertVehicul->prix = $req->prix;
+                $InsertVehicul->porte = $req->porte;
+                $InsertVehicul->transmission = $req->transmission;
+                $InsertVehicul->place = $req->place;
+                $InsertVehicul->bagage = $req->bagage;
+                $InsertVehicul->save();
 
-        return response()->json([
-            'message' => 'un vehicule est inseret avec succes!',
-            'file_path' => "/storage/$photoPath",
-            'path' => Storage::url($photoPath),
-        ]);
-    } else {
-        return response()->json([
-            'error' => 'veuillez inseret un photo!'
-        ], 400);
-    }
+                return response()->json([
+                    'message' => 'un vehicule est inseret avec succes!',
+                    'file_path' => "/storage/$photoPath",
+                    'path' => Storage::url($photoPath),
+                ]);
+            } else {
+                return response()->json([
+                    'error' => 'veuillez inseret un photo!'
+                ], 400);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'messageError' => $e->getMessage(),
             ], 500);
         }
-
-
     }
     //
     //affichage des vehicules
@@ -71,7 +71,6 @@ class VehiculeController extends Controller
                 'messageError' => $e->getMessage(),
             ], 500);
         }
-
     }
 
     //suppression d'un vehicule
@@ -108,10 +107,9 @@ class VehiculeController extends Controller
             //modification du photo
             if ($req->hasFile('photo')) {
                 $photo = $req->file('photo');
-                $photoName = time().'.'.$photo->getClientOriginalExtension();
+                $photoName = time() . '.' . $photo->getClientOriginalExtension();
                 $photoPath = $photo->storeAs('ImageVehicule', $photoName, 'public');
                 $InsertVehicul->photo = $photoName;
-
             }
 
             //modifiation des donnes
@@ -128,12 +126,10 @@ class VehiculeController extends Controller
                 'message' => 'modiifer!',
                 'vehicule' => $InsertVehicul,
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'messageError' => $e->getMessage(),
             ], 500);
         }
     }
-
 }
