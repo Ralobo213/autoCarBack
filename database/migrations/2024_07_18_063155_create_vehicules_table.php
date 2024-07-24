@@ -18,9 +18,10 @@ return new class extends Migration
             $table->string('matricule');
             $table->text('description');
             $table->string('prix');
-            $table->string('porte');
+            $table->enum('porte',['2','3','4','5']);
             $table->string('place');
             $table->string('bagage');
+            $table->enum('transmission',['Automatique','Manuelle']);
             $table->timestamps();
         });
     }
