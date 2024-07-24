@@ -6,9 +6,20 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class SuperAdminController extends Controller
 {
+
+    public function Users()
+    {
+        try {
+            $users = User::all();
+            return response()->json($users);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
 
     public function register(Request $request)
     {
@@ -61,21 +72,21 @@ class SuperAdminController extends Controller
                 'name' => 'string|max:255',
                 'firstname' => 'string|max:255',
                 'email' => 'string|email|max:255|unique:users,email,' . $id,
-                'password' => 'string|min:8|confirmed',
-                'Job' => 'nullable|string|max:255',
+                'password' => 'string|min:8',
+                'job' => 'nullable|string|max:255',
                 'contact' => 'nullable|string|max:255',
-                'photo' => 'nullable|string|max:255',
-                'Role' => 'string|in:Admin,SuperAdmin', // Assurez-vous que Role est valide
+                'photo' => 'nullable|image|max:2048',
+                'role' => 'string|in:Admin,SuperAdmin', // Assurez-vous que Role est valide
             ]);
-
+    
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
-
+    
             // Trouver l'utilisateur à mettre à jour
             $user = User::findOrFail($id);
-
-            // Mettre à jour les champs seulement si ils existent
+    
+            // Mettre à jour les champs seulement s'ils existent
             if ($request->has('name')) {
                 $user->name = $request->name;
             }
@@ -88,22 +99,32 @@ class SuperAdminController extends Controller
             if ($request->has('password')) {
                 $user->password = Hash::make($request->password);
             }
-            if ($request->has('Job')) {
-                $user->Job = $request->Job;
+            if ($request->has('job')) {
+                $user->job = $request->job;
             }
             if ($request->has('contact')) {
                 $user->contact = $request->contact;
             }
-            if ($request->has('photo')) {
-                $user->photo = $request->photo;
+            if ($request->has('role')) {
+                $user->role = $request->role;
             }
-            if ($request->has('Role')) {
-                $user->Role = $request->Role;
+    
+            // Mettre à jour la photo si une nouvelle photo est téléchargée
+            if ($request->hasFile('photo')) {
+                // Supprimer l'ancienne photo si elle existe
+                if ($user->photo) {
+                    Storage::delete('public/' . $user->photo);
+                }
+    
+                // Enregistrer la nouvelle photo
+                $photo = $request->file('photo');
+                $photoPath = $photo->store('photos', 'public');
+                $user->photo = $photoPath;
             }
-
+    
             // Sauvegarder les modifications
             $user->save();
-
+    
             return response()->json(['message' => 'User updated successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -123,4 +144,28 @@ class SuperAdminController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+    public function show($id)
+    {
+        try {
+            // Valider que l'ID est bien un entier
+            if (!is_numeric($id) || (int)$id <= 0) {
+                return response()->json(['message' => 'Invalid ID provided'], 400);
+            }
+    
+            // Trouver l'utilisateur par son ID
+            $user = User::find($id);
+    
+            // Vérifier si l'utilisateur existe
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+    
+            // Retourner les détails de l'utilisateur sous forme de JSON
+            return response()->json($user);
+        } catch (\Exception $e) {
+            // Retourner un message d'erreur en cas d'exception
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
+    
 }

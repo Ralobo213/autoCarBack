@@ -29,7 +29,7 @@ class RegisteredUserController extends Controller
                 'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
                 'Job' => ['required', 'string', 'max:255'],
                 'contact' => ['nullable', 'string', 'max:255'],
-                'photo' => ['nullable', 'string', 'max:255'],
+                'photo' => ['nullable', 'image', 'max:255'],
                 'Role' => ['string', 'in:Admin,SuperAdmin'], // Assurez-vous que Role est valide
             ]);
     
