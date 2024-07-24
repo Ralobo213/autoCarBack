@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reservation;
 use App\Models\User;
+use App\Models\Vehicule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -167,5 +169,47 @@ class SuperAdminController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+    public function CountUser()
+    {
+        try{
+            $count = User::count();
+            $vehi = Vehicule::count();
+            return response()->json([
+                'count' => $count,
+                'vehi' => $vehi
+            ]);
+        }
+        catch(\Exception $e){
+            return response()->json(['message' => 'une erreur'.$e->getMessage()], 500);
+        }
+    }
+
+    public function reservation(Request $req , $id){
+        try {
+            // Valider les données de la requête
+            $validator = Validator::make($req->all(), [
+                'DateDebut' => 'required|string|max:200',
+                'DateFin' => 'required|string|max:200',
+                'PriceTotal' => 'bail|nullable'
+            ]);
     
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            // creation reservation
+            $reservation = new Reservation();
+            $reservation->id_client = $req->id_client;
+            $reservation->id_voiture = $id;
+            $reservation->DateDebut = $req->DateDebut;
+            $reservation->DateFin = $req->DateFin;
+            $reservation->PriceTotal = $req->Price;
+            $reservation -> save();
+            return response()->json('succes','Reservation succes');
+        }
+        catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
 }

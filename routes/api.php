@@ -21,3 +21,5 @@ Route::post('updateCare/{id}',[VehiculeController::class, 'updateCar']);
  Route::post('register', [SuperAdminController::class, 'register']);
  Route::post('updateUser', [SuperAdminController::class, 'updateUser']);
  Route::post('deleteUser', [SuperAdminController::class, 'deleteUser']);
+ Route::get('CountUser', [SuperAdminController::class, 'CountUser']);
+ Route::post('Reservation/{id}', [SuperAdminController::class, 'reservation']);
