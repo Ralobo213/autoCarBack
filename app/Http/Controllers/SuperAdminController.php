@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,10 +31,10 @@ class SuperAdminController extends Controller
                 'firstname' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8',
-                'job' => 'nullable|string|max:255',
+                'Job' => 'nullable|string|max:255',
                 'contact' => 'nullable|string|max:255',
                 'photo' => 'nullable|image|max:2048', // Taille maximale de 2MB pour l'image
-                'role' => 'string|in:Admin,SuperAdmin', // Assurez-vous que Role est valide
+                'Role' => 'string|in:Admin,SuperAdmin', // Assurez-vous que Role est valide
             ]);
 
             if ($validator->fails()) {
@@ -53,8 +54,8 @@ class SuperAdminController extends Controller
                 'firstname' => $request->firstname,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'job' => $request->job,
-                'role' => $request->input('role', 'Admin'), // Définir 'Admin' comme rôle par défaut
+                'Job' => $request->job,
+                'Role' => $request->input('Role', 'Admin'), // Définir 'Admin' comme rôle par défaut
                 'contact' => $request->contact,
                 'photo' => $photoPath, // Chemin d'accès au fichier de photo enregistré
             ]);
@@ -65,71 +66,74 @@ class SuperAdminController extends Controller
         }
     }
     public function updateUser(Request $request, $id)
-    {
-        try {
-            // Valider les données de la requête
-            $validator = Validator::make($request->all(), [
-                'name' => 'string|max:255',
-                'firstname' => 'string|max:255',
-                'email' => 'string|email|max:255|unique:users,email,' . $id,
-                'password' => 'string|min:8',
-                'job' => 'nullable|string|max:255',
-                'contact' => 'nullable|string|max:255',
-                'photo' => 'nullable|image|max:2048',
-                'role' => 'string|in:Admin,SuperAdmin', // Assurez-vous que Role est valide
-            ]);
-    
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 400);
-            }
-    
-            // Trouver l'utilisateur à mettre à jour
-            $user = User::findOrFail($id);
-    
-            // Mettre à jour les champs seulement s'ils existent
-            if ($request->has('name')) {
-                $user->name = $request->name;
-            }
-            if ($request->has('firstname')) {
-                $user->firstname = $request->firstname;
-            }
-            if ($request->has('email')) {
-                $user->email = $request->email;
-            }
-            if ($request->has('password')) {
-                $user->password = Hash::make($request->password);
-            }
-            if ($request->has('job')) {
-                $user->job = $request->job;
-            }
-            if ($request->has('contact')) {
-                $user->contact = $request->contact;
-            }
-            if ($request->has('role')) {
-                $user->role = $request->role;
-            }
-    
-            // Mettre à jour la photo si une nouvelle photo est téléchargée
-            if ($request->hasFile('photo')) {
-                // Supprimer l'ancienne photo si elle existe
-                if ($user->photo) {
-                    Storage::delete('public/' . $user->photo);
-                }
-    
-                // Enregistrer la nouvelle photo
-                $photo = $request->file('photo');
-                $photoPath = $photo->store('photos', 'public');
-                $user->photo = $photoPath;
-            }
-    
-            // Sauvegarder les modifications
-            $user->save();
-    
-            return response()->json(['message' => 'User updated successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+{
+    try {
+        // Valider les données de la requête
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|max:255',
+            'firstname' => 'string|max:255',
+            'email' => 'string|email|max:255|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:8',
+            'Job' => 'nullable|string|max:255',
+            'contact' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|max:2048',
+            'Role' => 'string|in:Admin,SuperAdmin',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
+
+        // Trouver l'utilisateur à mettre à jour
+        $user = User::findOrFail($id);
+
+        // Mettre à jour les champs seulement s'ils existent
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->has('firstname')) {
+            $user->firstname = $request->firstname;
+        }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        if ($request->has('Job')) {
+            $user->Job = $request->Job;
+        }
+        if ($request->has('contact')) {
+            $user->contact = $request->contact;
+        }
+        if ($request->has('Role')) {
+            $user->Role = $request->Role;
+        }
+
+        // Mettre à jour la photo si une nouvelle photo est téléchargée
+        if ($request->hasFile('photo')) {
+            // Supprimer l'ancienne photo si elle existe
+            if ($user->photo) {
+                Storage::delete('public/' . $user->photo);
+            }
+
+            // Enregistrer la nouvelle photo
+            $photo = $request->file('photo');
+            $photoPath = $photo->store('photos', 'public');
+            $user->photo = $photoPath;
+        }
+
+        // Sauvegarder les modifications
+        $user->save();
+
+        return response()->json(['message' => 'User updated successfully']);
+    } catch (\Exception $e) {
+        Log::error('Erreur lors de la mise à jour de l’utilisateur: ' . $e->getMessage());
+        return response()->json(['message' => 'Erreur lors de la mise à jour'], 500);
     }
+}
+
+     
     public function deleteUser($id)
     {
         try {
