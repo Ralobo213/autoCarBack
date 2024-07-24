@@ -23,3 +23,8 @@ Route::post('updateCare/{id}',[VehiculeController::class, 'updateCar']);
  Route::post('register', [SuperAdminController::class, 'register']);
  Route::post('updateUser', [SuperAdminController::class, 'updateUser']);
  Route::post('deleteUser', [SuperAdminController::class, 'deleteUser']);
+
+ Route::get('/users', [SuperAdminController::class, 'users']);
+ Route::post('/updateUser/{id}', [SuperAdminController::class, 'updateUser']);
+ Route::delete('/deleteUser/{id}', [SuperAdminController::class, 'deleteUser']);
+ Route::get('/user/{id}', [SuperAdminController::class, 'show']);
